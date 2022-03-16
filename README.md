@@ -1,8 +1,28 @@
 # yatube_project_n
 Социальная сеть блогеров
 
+###Название проекта
+Yatube
+###Краткое описание
+социальная сеть
+###Технологии в проекте
+Python 3.9
+Django 4.0.3
+###Инструкция по запуску
+- Установите и активируйте виртуальное окружение
+####для развертывания проекта на другой машине необходимо выполнять
+- pip install -r requirements.txt
+###Автор
+Андрей Грин
 
+
+
+###Команды по ходу проекта
 ####обновелние пакета pip
-- python -m pip install --upgrade pip
+_python -m pip install --upgrade pip_
 ####Устновка DjanGo
-- pip install Django
+_pip install Django_
+####создание проекта, его базовой структуры (точка запускает проект в текущей дериктории)
+_django-admin startproject yatube ._
+####создание файла зависимостей
+_pip freeze > requirements.txt_
