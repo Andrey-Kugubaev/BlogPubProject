@@ -26,3 +26,6 @@ _pip install Django_
 _django-admin startproject yatube ._
 ####создание файла зависимостей
 _pip freeze > requirements.txt_
+####Создание приложения и его регистрация
+_django-admin startapp posts_
+####Проектирование адресов в urls.py
