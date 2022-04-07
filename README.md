@@ -29,3 +29,8 @@ _pip freeze > requirements.txt_
 ####Создание приложения и его регистрация
 _django-admin startapp posts_
 ####Проектирование адресов в urls.py
+
+####Добавление шаблонов
+
+#####Ссылки, namespaсe и name
+#####Подключение CSS и Static
