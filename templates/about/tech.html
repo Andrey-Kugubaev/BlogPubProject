@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <body>
+    <main>
+      <div class="container py-5">
+        <div class="row">
+          <h1>Вот что я умею</h1>
+          <aside class="col-12 col-md-3">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <p style="text-align: center; margin-top: 20px;"><a href="https://www.python.org/downloads/release/python-390/"><b>Python 3.9.0</b></a></p>
+              </li>
+              <li class="list-group-item">
+                <p style="text-align: center; margin-top: 20px;"><a href="https://docs.djangoproject.com/en/4.0/"><b>Django 4.0.3</b></a></p>
+              </li>
+            </ul>
+          </aside>
+          <article class="col-12 col-md-9">
+            <p>Тут только основа, все остальное мелкое под капотом!</p>
+          </article>
+        </div>
+      </div>
+    </main>
+  </body>
+{% endblock %}
