@@ -135,3 +135,9 @@ dmypy.json
 static/
 /static
 /static/
+
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover

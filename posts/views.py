@@ -71,7 +71,7 @@ def post_create(request):
     new_post = form.save(commit=False)
     new_post.author = request.user
     form.save()
-    return redirect('posts:posts_list')
+    return redirect('posts:profile', username=new_post.author)
 
 
 @login_required
