@@ -136,6 +136,10 @@ static/
 /static
 /static/
 
+media/
+/media/
+/media
+
 htmlcov/
 .coverage
 .coverage.*

@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
+
 from django import forms
 
-from posts.models import Post, Group
+from posts.models import Post, Group, Comment, Follow
 
 User = get_user_model()
 
@@ -13,6 +16,19 @@ class PostPagesTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='testuser')
+        cls.small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=cls.small_gif,
+            content_type='image/gif'
+        )
         cls.group = Group.objects.create(
             title='Группа теста',
             slug='group_test',
@@ -21,7 +37,8 @@ class PostPagesTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Пост тестовый',
-            group=cls.group
+            group=cls.group,
+            image=cls.uploaded
         )
 
     def setUp(self):
@@ -45,6 +62,7 @@ class PostPagesTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_posts_pages_auth_template(self):
+        cache.clear()
         post = PostPagesTests.post
         templates_pages_names = {
             reverse('posts:post_create'): 'posts/create_post.html',
@@ -57,12 +75,15 @@ class PostPagesTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_home_page_context(self):
+        cache.clear()
         response = self.guest_client.get(reverse('posts:posts_list'))
         first_object = response.context['page_obj'][0]
         post_text_0 = first_object.text
         post_group_0 = first_object.group.title
+        post_image_0 = first_object.image
         self.assertEqual(post_text_0, 'Пост тестовый')
         self.assertEqual(post_group_0, 'Группа теста')
+        #self.assertEqual(post_image_0, self.uploaded)
 
     def test_group_list_context(self):
         response = self.guest_client.get(reverse('posts:group_list', kwargs={'slug': 'group_test'}))
@@ -188,3 +209,139 @@ class PaginatorViewsTest(TestCase):
 #
 #     def test_post_view_index(self):
 
+
+class CommentTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='testuser')
+        cls.group = Group.objects.create(
+            title='Группа с комментом',
+            slug='group_test_com',
+            description='Описание группы для комментирования',
+        )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Пост тестовый для комментов',
+            group=cls.group,
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = CommentTests.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_comment_create(self):
+        # после успешной отправки комментарий появляется на странице поста.
+        post = CommentTests.post
+        data = {'text': 'Тестовый комментарий'}
+        response = self.authorized_client.post(
+            reverse('posts:add_comment', kwargs={'post_id': post.pk}),
+            data=data
+        )
+        self.assertEqual(Comment.objects.count(), 1)
+        check = Comment.objects.first()
+        self.assertEqual(check.text, 'Тестовый комментарий')
+        self.assertEqual(check.post, self.post)
+        self.assertEqual(check.author, self.user)
+
+
+class CashTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='test_cashuser')
+        #cls.group = Group.objects.create(
+        #    title='Группа с комментом для кэша',
+        #    slug='group_test_cash',
+        #    description='Описание группы для теста кэша',
+        #)
+        #cls.post = Post.objects.create(
+        #    author=cls.user,
+        #    text='Пост тестовый для кэша',
+        #    group=cls.group,
+        #)
+
+    def setUp(self):
+        self.guest_client = Client()
+        self.user = CashTests.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_cash_index(self):
+        response = self.authorized_client.get(reverse('posts:posts_list'))
+        cashe_text = 'Новый текст'
+        Post.objects.create(author=CashTests.user, text=cashe_text)
+        response = self.authorized_client.get(reverse('posts:posts_list'))
+        self.assertNotContains(response, cashe_text)
+        cache.clear()
+        response = self.authorized_client.get(reverse('posts:posts_list'))
+        self.assertContains(response, cashe_text)
+        Post.objects.filter(pk=1).delete()
+        response = self.authorized_client.get(reverse('posts:posts_list'))
+        self.assertContains(response, cashe_text)
+        cache.clear()
+        response = self.authorized_client.get(reverse('posts:posts_list'))
+        self.assertNotContains(response, cashe_text)
+
+    def tearDown(self):
+        cache.clear()
+
+
+class FollowTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.author = User.objects.create_user(username='testauthor')
+        cls.user = User.objects.create_user(username='testuser')
+        cls.user_un = User.objects.create_user(username='testuserunfol')
+        cls.group = Group.objects.create(
+            title='Тест подписов',
+            slug='group_test_fol',
+            description='Описание группы для теста подписок',
+        )
+        cls.post = Post.objects.create(
+            author=cls.author,
+            text='Тест подписки',
+            group=cls.group,
+        )
+
+    def setUp(self):
+        self.author_client = Client()
+        self.user_client = Client()
+        self.user_unfollow_client = Client()
+        self.user = FollowTests.user
+        self.author = FollowTests.author
+        self.user_un = FollowTests.user_un
+        self.author_client.force_login(self.author)
+        self.user_client.force_login(self.user)
+        self.user_unfollow_client.force_login(self.user_un)
+
+    def test_auth_follow(self):
+        self.user_client.get(reverse('posts:profile_follow', args=[self.author.username]))
+        response = self.user_client.get(reverse('posts:follow_index'))
+        self.assertEqual(Follow.objects.count(), 1)
+        check = Follow.objects.first()
+        self.assertEqual(check.user, self.user)
+        self.assertEqual(check.author, self.author)
+
+    def test_auth_unfollow(self):
+        self.lion = Follow.objects.create(user=self.user, author=self.author)
+        self.user_client.get(
+            reverse('posts:profile_unfollow', args=[self.author.username])
+            )
+        self.assertEqual(Follow.objects.count(), 0)
+
+    def test_post_follow(self):
+        post = FollowTests.post
+        self.user_client.get(
+            reverse('posts:profile_follow', args=[self.author.username])
+            )
+        response = self.user_client.get(reverse('posts:follow_index'))
+        self.assertContains(response, post.text)
+
+    def test_post_unfollow(self):
+        post = FollowTests.post
+        response = self.user_unfollow_client.get(reverse('posts:follow_index'))
+        self.assertNotContains(response, post.text)

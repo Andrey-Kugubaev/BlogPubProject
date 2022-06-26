@@ -44,6 +44,22 @@
                       Группа, к которой будет относиться пост
                     </small>
                   </div>
+                  <div class="form__group row my-3 p-3">
+                    {% if is_edit %}
+                      <label for="id_image">Изображение</label>
+                      На данный момент
+                      <a href="/media/{{ post.image }}">{{ post.image }}</a>
+                      <label for="image-clear_id">Очистить
+                        <input type="checkbox" name="image-clear" id="image-clear_id">
+                      </label>
+                      <br>
+                      Изменить
+                      <input type="file" name="image" accept="image/*" class="form-control" id="id_image">
+                    {% else %}
+                      <label for="id_image">Изображение</label>
+                      <input type="file" name="image" accept="image/*" class="form-control" id="id_image">
+                    {% endif %}
+                  </div>
                   <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary">
                       {% if is_edit %}
