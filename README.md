@@ -13,5 +13,5 @@ Python 3.9, Django 4.0.3, SQLite, HTML, CSS, unittest, etc.
   source venv/Scripts/activate
 - установите зависимости
   pip install -r requirements.txt
-- хапустите сервер
+- запустите сервер
   python manage.py runserver
