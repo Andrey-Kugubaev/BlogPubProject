@@ -8,7 +8,10 @@ Python 3.9, Django 4.0.3, SQLite, HTML, CSS, unittest, etc.
 
 Инструкция по запуску
 - Склонируйте проект
+  git clone https://github.com/Andrey-Kugubaev/yatube_project_n.git
 - Активируйте виртуальное окружение
-- pip install -r requirements.txt
-- python manage.py runserver
-- Установите и активируйте виртуальное окружение
+  source venv/Scripts/activate
+- установите зависимости
+  pip install -r requirements.txt
+- хапустите сервер
+  python manage.py runserver
