@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
 from django.views.decorators.cache import cache_page
 
-from posts.models import Post, Group, User, Comment, Follow
+from posts.models import Post, Group, User, Follow
 from posts.forms import PostForm, CommentForm
 
 
@@ -89,7 +89,6 @@ def post_create(request):
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     groups = Group.objects.all()
-    #group_post = get_object_or_404(Group, slug=slug)
     is_edit = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
         return redirect('posts:post_detail', post_id=post_id)
@@ -138,7 +137,6 @@ def follow_index(request):
     page_obj = paginator.get_page(page_number)
     context = {
         'page_obj': page_obj,
-        #'paginator': paginator
     }
     return render(request, 'posts/follow.html', context)
 
@@ -159,7 +157,6 @@ def profile_follow(request, username):
 
 @login_required
 def profile_unfollow(request, username):
-    # Дизлайк, отписка
     follower = request.user
     following = get_object_or_404(User, username=username)
     author_list = Follow.objects.filter(user=follower, author=following)

@@ -100,20 +100,16 @@ class CommentURLtest(TestCase):
         self.authorized_client.force_login(self.user)
 
     def test_comment_create_url(self):
-        #тест перенапрвления неавторизованного пользователя
         post = CommentURLtest.post
         response = self.guest_client.get(f'/posts/{post.pk}/comment/')
         self.assertRedirects(response, f'/auth/login/?next=/posts/{post.pk}/comment/')
 
-
     def test_comment_url(self):
-        # комментировать посты может только авторизованный пользователь;
         post = CommentURLtest.post
         response = self.guest_client.get(f'/posts/{post.pk}/comment/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_auth_comment_url(self):
-        # комментировать посты может только авторизованный пользователь;
         post = CommentURLtest.post
         response = self.authorized_client.get(f'/posts/{post.pk}/comment/')
         self.assertEqual(response.status_code, HTTPStatus.OK)

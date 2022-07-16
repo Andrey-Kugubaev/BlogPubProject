@@ -35,7 +35,6 @@ class PostModelTest(TestCase):
 
 
     def test_verbose_name(self):
-        """verbose_name в полях совпадает с ожидаемым."""
         task = PostModelTest.post
         field_verboses = {
             'group': 'Группа',
@@ -49,7 +48,6 @@ class PostModelTest(TestCase):
                     task._meta.get_field(field).verbose_name, expected_value)
 
     def test_help_text(self):
-        """help_text в полях совпадает с ожидаемым."""
         task = PostModelTest.post
         field_help_texts = {
             'group': 'Группа, к которой будет относиться пост',

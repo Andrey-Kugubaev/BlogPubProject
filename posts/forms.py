@@ -1,7 +1,6 @@
 from django import forms
 from django.forms import ModelForm, Textarea
 from posts.models import Post, Comment
-from posts.models import Group
 
 
 class PostForm(forms.ModelForm):

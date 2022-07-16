@@ -69,11 +69,15 @@ class PostFormTests(TestCase):
         response = self.authorized_client.post(
             reverse('posts:post_create'),
             data=form_data,
-            #follow=True
         )
         self.assertRedirects(response, '/profile/testuserform/')
         self.assertEqual(Post.objects.count(), posts_count+1)
-        self.assertTrue(Post.objects.filter(text='Тестовый пост для теста формы', group=self.group.id).exists()) #image='posts/small.gif'))
+        self.assertTrue(
+            Post.objects.filter(
+                text='Тестовый пост для теста формы',
+                group=self.group.id
+            ).exists()
+        )
 
     def test_edit_post(self):
         posts_count = Post.objects.count()
@@ -81,9 +85,14 @@ class PostFormTests(TestCase):
         form_data = {
             'text': new_text,
             'group': self.group.id,
-            #'image': uploaded,
         }
-        self.authorized_client.post(reverse('posts:post_edit', kwargs={'post_id': self.post.id}), data=form_data)
+        self.authorized_client.post(
+            reverse(
+                'posts:post_edit',
+                kwargs={'post_id': self.post.id}
+            ),
+            data=form_data
+        )
         post = PostFormTests.post
         post.refresh_from_db()
         self.assertEqual(Post.objects.count(), posts_count)
